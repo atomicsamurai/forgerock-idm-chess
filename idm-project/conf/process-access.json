@@ -1,0 +1,32 @@
+{
+    "workflowAccess" : [
+        {
+            "propertiesCheck" : {
+                "property" : "_id",
+                "matches" : ".*",
+                "requiresRole" : "internal/role/openidm-admin"
+            }
+        },
+        {
+            "propertiesCheck" : {
+                "property" : "_id",
+                "matches" : "chess_game.*",
+                "requiresRole" : "managed/role/b1320e3a-4327-4319-8564-c36c86b3d359"
+            }
+        },
+        {
+            "propertiesCheck" : {
+                "property" : "_id",
+                "matches" : "test7.*",
+                "requiresRole" : "managed/role/b1320e3a-4327-4319-8564-c36c86b3d359"
+            }
+        },
+        {
+            "propertiesCheck" : {
+                "property" : "_id",
+                "matches" : "test8.*",
+                "requiresRole" : "managed/role/b1320e3a-4327-4319-8564-c36c86b3d359"
+            }
+        }
+    ]
+}

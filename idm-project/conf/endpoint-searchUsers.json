@@ -1,0 +1,5 @@
+{
+    "type": "text/javascript",
+    "context": "endpoint/searchUsers",
+    "file": "searchUsers.js"
+}
