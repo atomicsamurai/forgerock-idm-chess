@@ -17,25 +17,24 @@
    - not already playing a game with calling user
  */
 (function(){
-    // if (request.method === "read") {
-        var myid = context.parent.parent.parent.authorization.authenticationId;
-        var queryFilter = {
-            _queryFilter: "/gameOptIn eq true and ! /userName eq '" +
-                myid + 
-                "' and userName co '" +
-                request.additionalParameters.searchtext + 
-                "' or /gameOptIn eq true and ! /userName eq '" +
-                myid + 
-                "' and givenName co '" +
-                request.additionalParameters.searchtext + 
-                "' or /gameOptIn eq true and ! /userName eq '" +
-                myid + 
-                "' and sn co '" +
-                request.additionalParameters.searchtext + 
-                "'"
-        };
-        var result = openidm.query("managed/user", queryFilter, ["_id", "userName", "givenName", "sn"]);
-        //console.log(result);
-        return result;
+  var myid = context.parent.parent.parent.authorization.authenticationId;
+  var queryFilter = {
+    _queryFilter: "/preferences/games eq true and ! /userName eq '" +
+      myid + 
+      "' and userName co '" +
+      request.additionalParameters.searchtext + 
+      "' or /preferences/games eq true and ! /userName eq '" +
+      myid + 
+      "' and givenName co '" +
+      request.additionalParameters.searchtext + 
+      "' or /preferences/games eq true and ! /userName eq '" +
+      myid + 
+      "' and sn co '" +
+      request.additionalParameters.searchtext + 
+      "'"
+  };
+  var result = openidm.query("managed/user", queryFilter, ["_id", "userName", "givenName", "sn"]);
+  //console.log(result);
+  return result;
 })();
 

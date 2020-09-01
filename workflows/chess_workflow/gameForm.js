@@ -26,7 +26,6 @@
             selectedGameId: null,
             selectedGame: null,
             myStatus: '',
-            gameOptIn: false,
             iconDir: '@/components/dashboard/widgets/chessboard/chess-pieces/',
             formData: {}
         };

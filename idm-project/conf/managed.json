@@ -561,7 +561,7 @@
             "onCreate" : {
                 "type" : "text/javascript",
                 "globals" : { },
-                "source" : "require('onCreateUser').setDefaultFields(object);require('onCreateUser').emailUser(object);\nobject.gameOptIn = false;\n"
+                "source" : "require('onCreateUser').setDefaultFields(object);require('onCreateUser').emailUser(object);\n"
             },
             "onUpdate" : {
                 "type" : "text/javascript",
@@ -1241,13 +1241,6 @@
                             },
                             "resourceCollection" : [ ]
                         }
-                    },
-                    "gameOptIn" : {
-                        "title" : "Opt in for games",
-                        "type" : "boolean",
-                        "viewable" : true,
-                        "searchable" : false,
-                        "userEditable" : true
                     }
                 },
                 "order" : [
@@ -1277,8 +1270,7 @@
                     "preferences",
                     "consentedMappings",
                     "games",
-                    "idps",
-                    "gameOptIn"
+                    "idps"
                 ],
                 "required" : [
                     "userName",
