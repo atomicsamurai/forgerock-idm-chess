@@ -11,7 +11,7 @@
             "propertiesCheck" : {
                 "property" : "_id",
                 "matches" : "chess_game.*",
-                "requiresRole" : "managed/role/opted-in-for-games"
+                "requiresRole" : "internal/role/opted-in-for-games"
             }
         }
     ]

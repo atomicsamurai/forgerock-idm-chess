@@ -1,61 +1,68 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.activiti.org/processdef">
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:flowable="http://flowable.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.flowable.org/processdef">
   <process id="chess_game" name="Chess game" isExecutable="true">
-    <startEvent id="startgame" name="Start" activiti:initiator="player1id" activiti:formKey="startForm.js">
+    <startEvent id="startgame" name="Start" flowable:initiator="player1id" flowable:formKey="startForm.js">
       <extensionElements>
-        <activiti:formProperty id="selected" name="Selected" type="string" required="true"></activiti:formProperty>
+        <flowable:formProperty id="selected" name="Selected" type="string" required="true"></flowable:formProperty>
       </extensionElements>
     </startEvent>
     <sequenceFlow id="flow1" sourceRef="startgame" targetRef="startgateway"></sequenceFlow>
     <exclusiveGateway id="startgateway"></exclusiveGateway>
     <sequenceFlow id="flow2" sourceRef="startgateway" targetRef="setuserid"></sequenceFlow>
-    <scriptTask id="setuserid" name="Set Userid" scriptFormat="groovy" activiti:autoStoreVariables="false">
+    <scriptTask id="setuserid" name="Set Userid" scriptFormat="groovy" flowable:autoStoreVariables="false">
       <script>
         
         execution.setVariable("player2id", selected)
       </script>
     </scriptTask>
     <sequenceFlow id="flow3" sourceRef="setuserid" targetRef="sendinvite"></sequenceFlow>
-    <scriptTask id="sendinvite" name="Send invite" scriptFormat="groovy" activiti:autoStoreVariables="false">
+    <scriptTask id="sendinvite" name="Send invite" scriptFormat="groovy" flowable:autoStoreVariables="false">
       <script>
         def user1Qry = openidm.query("managed/user", ["_queryFilter": '/userName eq "'+player1id+'"'])
         def res1id = (user1Qry.result.size() == 1) ? ("managed/user/" + user1Qry.result[0]._id) : null
-        execution.setVariable('player1resourceid', res1id)
-        
-        execution.setVariable('player1name', user1Qry.result[0].givenName+' '+user1Qry.result[0].sn)
+        if(res1id) {
+          execution.setVariable('player1resourceid', res1id)
+          execution.setVariable('player1name', user1Qry.result[0].givenName+' '+user1Qry.result[0].sn)
 
-        def user2Qry = openidm.query("managed/user", ["_queryFilter": '/userName eq "'+player2id+'"'])
-        def res2id = (user2Qry.result.size() == 1) ? ("managed/user/" + user2Qry.result[0]._id) : null
-        execution.setVariable('player2resourceid', res2id)
-        
-        execution.setVariable('player2name', user2Qry.result[0].givenName+' '+user2Qry.result[0].sn)
+          def user2Qry = openidm.query("managed/user", ["_queryFilter": '/userName eq "'+player2id+'"'])
+          def res2id = (user2Qry.result.size() == 1) ? ("managed/user/" + user2Qry.result[0]._id) : null
+          if(res2id) {
+            execution.setVariable('player2resourceid', res2id)
+            execution.setVariable('player2name', user2Qry.result[0].givenName+' '+user2Qry.result[0].sn)
 
-        payload = [
-          notificationType: "info",
-          message: player1name + " (" + player1id + ") has invited you to a game of chess"
-        ]
-        params1 = [
-          _queryFilter: "userName eq '"+ player2id + "'",
-          targetResourceCollection: "managed/user"
-        ]
-        openidm.action("notification", "notifyByQueryFilter", payload, params1)
+            payload = [
+              notificationType: "info",
+              message: player1name + " (" + player1id + ") has invited you to a game of chess"
+            ]
+            params1 = [
+              _queryFilter: "userName eq '"+ player2id + "'",
+              targetResourceCollection: "managed/user"
+            ]
+            openidm.action("notification", "notifyByQueryFilter", payload, params1)
+          }
+        }
       </script>
     </scriptTask>
     <sequenceFlow id="flow4" sourceRef="sendinvite" targetRef="acceptreject"></sequenceFlow>
-    <userTask id="acceptreject" name="Game invite from ${player1name} (${player1id})" activiti:assignee="${player2id}" activiti:formKey="acceptForm.js">
+    <userTask id="acceptreject" name="Game invite from ${player1name} (${player1id})" flowable:assignee="${player2id}" flowable:formKey="acceptForm.js">
       <extensionElements>
-        <activiti:formProperty id="accepted" name="Accepted" type="enum" required="true">
-          <activiti:value id="yes" name="Yes"></activiti:value>
-          <activiti:value id="no" name="No"></activiti:value>
-        </activiti:formProperty>
-        <activiti:taskListener event="complete" class="org.activiti.engine.impl.bpmn.listener.ScriptTaskListener">
-          <activiti:field name="script">
-            <activiti:string><![CDATA[task.getExecution().setVariable("accepted", accepted)]]></activiti:string>
-          </activiti:field>
-          <activiti:field name="language">
-            <activiti:string><![CDATA[groovy]]></activiti:string>
-          </activiti:field>
-        </activiti:taskListener>
+        <flowable:formProperty id="accepted" name="Accepted" type="enum" required="true">
+          <flowable:value id="yes" name="Yes"></flowable:value>
+          <flowable:value id="no" name="No"></flowable:value>
+        </flowable:formProperty>
+        <flowable:taskListener event="complete" class="org.flowable.engine.impl.bpmn.listener.ScriptTaskListener">
+          <flowable:field name="script">
+            <flowable:string>
+                def execution = runtimeService.createExecutionQuery().executionId(task.getExecutionId()).singleResult()
+                execution.setVariable("accepted", accepted)
+            </flowable:string>
+            <!-- <flowable:string><![CDATA[task.getExecution().setVariable("accepted", accepted)]]></flowable:string> -->
+          </flowable:field>
+          <!-- <flowable:field name="language">
+            <flowable:string><![CDATA[groovy]]></flowable:string>
+          </flowable:field> -->
+          <flowable:field name="language" stringValue="groovy" />
+        </flowable:taskListener>
       </extensionElements>
     </userTask>
     <sequenceFlow id="flow5" sourceRef="acceptreject" targetRef="acceptrejectgateway"></sequenceFlow>
@@ -63,7 +70,7 @@
     <sequenceFlow id="flow6" name="Rejected" sourceRef="acceptrejectgateway" targetRef="endgame">
       <conditionExpression xsi:type="tFormalExpression"><![CDATA[${accepted=='no'}]]></conditionExpression>
     </sequenceFlow>
-    <scriptTask id="creategame" name="Create game" scriptFormat="groovy" activiti:autoStoreVariables="false">
+    <scriptTask id="creategame" name="Create game" scriptFormat="groovy" flowable:autoStoreVariables="false">
       <script>
         Date date = new Date()
         String datePart = date.format("dd/MM/yyyy")
@@ -101,7 +108,7 @@
       </script>
     </scriptTask>
     <sequenceFlow id="flow8" sourceRef="creategame" targetRef="notifyplayers"></sequenceFlow>
-    <scriptTask id="notifyplayers" name="Notify players" scriptFormat="groovy" activiti:autoStoreVariables="false">
+    <scriptTask id="notifyplayers" name="Notify players" scriptFormat="groovy" flowable:autoStoreVariables="false">
       <script>
         payload = [
           notificationType: "info",
@@ -123,9 +130,9 @@
     <sequenceFlow id="flow7" sourceRef="acceptrejectgateway" targetRef="creategame"></sequenceFlow>
     <parallelGateway id="createturnsgateway" name="Create user turns task"></parallelGateway>
     <sequenceFlow id="flow9" sourceRef="notifyplayers" targetRef="createturnsgateway"></sequenceFlow>
-    <userTask id="user2turn" name="Game with ${player1name} (${player1id})" activiti:assignee="${player2id}" activiti:formKey="gameForm.js"></userTask>
+    <userTask id="user2turn" name="Game with ${player1name} (${player1id})" flowable:assignee="${player2id}" flowable:formKey="gameForm.js"></userTask>
     <sequenceFlow id="flow11" sourceRef="createturnsgateway" targetRef="user2turn"></sequenceFlow>
-    <userTask id="user1turn" name="Game with ${player2name} (${player2id})" activiti:assignee="${player1id}" activiti:formKey="gameForm.js"></userTask>
+    <userTask id="user1turn" name="Game with ${player2name} (${player2id})" flowable:assignee="${player1id}" flowable:formKey="gameForm.js"></userTask>
     <sequenceFlow id="flow10" sourceRef="createturnsgateway" targetRef="user1turn"></sequenceFlow>
     <sequenceFlow id="flow12" sourceRef="user1turn" targetRef="endgame"></sequenceFlow>
     <sequenceFlow id="flow13" sourceRef="user2turn" targetRef="endgame"></sequenceFlow>
